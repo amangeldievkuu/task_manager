@@ -75,6 +75,18 @@ func updateTask(w http.ResponseWriter, r *http.Request, id int) {
 	http.Error(w, "Task not found", http.StatusNotFound)
 }
 
+func deleteTask(w http.ResponseWriter, r *http.Request, id int) {
+	for i, t := range tasks {
+		if t.ID == id {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+	}
+
+	http.Error(w, "Task not found", http.StatusNotFound)
+}
+
 func getOneTask(w http.ResponseWriter, _ *http.Request, id int) {
 	var task Task
 
@@ -105,6 +117,9 @@ func taskByIdHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodGet {
 		getOneTask(w, r, id)
 		return
+	} else if r.Method == http.MethodDelete {
+		deleteTask(w, r, id)
+		return
 	}
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
@@ -112,7 +127,6 @@ func taskByIdHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/tasks", taskHandler)
 	http.HandleFunc("/tasks/", taskByIdHandler)
-	http.Handler
 
 	fmt.Println("listens on port: 8000")
 	http.ListenAndServe(":8000", nil)
